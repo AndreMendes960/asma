@@ -84,6 +84,7 @@ public class piece extends Agent {
 			ACLMessage msg = receive();
 			if (msg != null) {
 
+				//subscribe is used to add the team manager to the piece and is followed by a request to set its initial Position
 				if (msg.getPerformative() == ACLMessage.SUBSCRIBE) {
 
 					try {
@@ -91,6 +92,17 @@ public class piece extends Agent {
 							AID content = (AID) msg.getContentObject();
 							//System.out.println("Manager assigned");
 							team_manager = content;
+							
+							ACLMessage initialPos = receive();
+							
+							if(initialPos != null && initialPos.getPerformative()== ACLMessage.INFORM)
+							{
+								Position initialPosContent = (Position) initialPos.getContentObject();
+								current_location = initialPosContent;
+							}
+							
+							System.out.println(current_location.getX() +":"+current_location.getY());
+							
 						}
 					catch (UnreadableException e) {
 						// TODO Auto-generated catch block
@@ -104,10 +116,10 @@ public class piece extends Agent {
 					//String content = msg.getContent();
 					if(true)
 					{
-						System.out.println(myAgent.getAID().getLocalName() + " Asked to move");
+						System.out.println(myAgent.getAID().getLocalName() + " Asked to move : " + current_location.getX());
 						try {
 							ArrayList<Position> surr = (ArrayList<Position>) msg.getContentObject();
-							System.out.println(myAgent.getLocalName() + " Received Information about Surroundings when asked to move");
+							surr.add(current_location);
 							
 							ACLMessage askGM = new ACLMessage(ACLMessage.REQUEST);
 							askGM.setContentObject(surr);
@@ -127,6 +139,7 @@ public class piece extends Agent {
 								System.out.println("Sending Accept Proposal");
 								
 								ACLMessage moveReply = new ACLMessage(ACLMessage.ACCEPT_PROPOSAL);
+								moveReply.setContentObject(nextPos);
 								moveReply.addReceiver(msg.getSender());
 								myAgent.send(moveReply);
 									
@@ -163,27 +176,46 @@ public class piece extends Agent {
 				else if (msg.getPerformative() == ACLMessage.CONFIRM)
 				{
 					System.out.println("I have been authorized to move");
+					
+					try {
+						Position newPos = (Position) msg.getContentObject();
+						current_location = newPos;
+						
+						
+					} catch (UnreadableException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+					
+					
 				}
 				
 				else if (msg.getPerformative() == ACLMessage.INFORM)
 				{
+					try {
 						//System.out.println(msg.getSender().getLocalName());
-						//ArrayList<Position> surr = (ArrayList<Position>) msg.getContentObject();
+						ArrayList<Position> surr = (ArrayList<Position>) msg.getContentObject();
 						//System.out.print(surr.get(0).getX());
 						//System.out.println(myAgent.getLocalName() + " Received Information about Surroundings");
 						//team_manager = content;
 						
 						//MOVE
 						System.out.println("Received Inform");	
-						//ACLMessage reply = new ACLMessage(ACLMessage.INFORM);
-						//Position newPosition = new Position(1,1);
-						//reply.setContentObject(surr);
-						//reply.addReceiver(team_manager);
-						//myAgent.send(reply);
+						ACLMessage reply = new ACLMessage(ACLMessage.INFORM);
+						//add pieces position to the list so manager has access to that information
+						surr.add(current_location);
+						reply.setContentObject(surr);
+						reply.addReceiver(team_manager);
+						myAgent.send(reply);
 						
 						
 						
 						
+					}
+					catch (UnreadableException | IOException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
 				}
 		}	
 	}

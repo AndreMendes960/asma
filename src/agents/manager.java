@@ -153,7 +153,8 @@ public class manager extends Agent {
 						{
 							try {
 								msg1.setContentObject(managers.get(0));
-								initialPosition.setContentObject(new Position(0, n*7));
+								initialPosition.setContentObject(new Position( n*7, 0));
+								pieces.get(n).setPosition(new Position( n*7, 0));
 							} catch (IOException e) {
 								// TODO Auto-generated catch block
 								e.printStackTrace();
@@ -163,7 +164,8 @@ public class manager extends Agent {
 						{
 							try {
 								msg1.setContentObject(managers.get(1));
-								initialPosition.setContentObject(new Position(34, (n*7) - ((n-1)*7)));
+								initialPosition.setContentObject(new Position(((n-5)*7),8));
+								pieces.get(n).setPosition(new Position(((n-5)*7),8));
 							} catch (IOException e) {
 								// TODO Auto-generated catch block
 								e.printStackTrace();
@@ -172,13 +174,6 @@ public class manager extends Agent {
 						msg1.addReceiver(pieces.get(n).getAgent());
 						initialPosition.addReceiver(pieces.get(n).getAgent());
 						myAgent.send(msg1);
-						
-						try {
-							Thread.sleep(500);
-						} catch (InterruptedException e) {
-							// TODO Auto-generated catch block
-							e.printStackTrace();
-						}
 						
 						myAgent.send(initialPosition);
 					}
@@ -274,17 +269,33 @@ public class manager extends Agent {
 						try {
 							Position movePos = (Position) reply.getContentObject();
 							
-							System.out.print("Received Position piece wants to move to");
-							if(checkMovement(movePos, myAgent))
+							//System.out.print("Received Position piece wants to move to");
+							//Movement is allowed
+							if(checkMovement(movePos, myAgent, pieces.get(i).getPosition()))
 							{
 								System.out.println("Allowed");
+								ACLMessage confirmMovement = new ACLMessage(ACLMessage.CONFIRM);
+								confirmMovement.addReceiver(pieces.get(i).getAgent());
+								confirmMovement.setContentObject(movePos);
+								
+								myAgent.send(confirmMovement);
+								
+								
+								pieces.get(i).setPosition(movePos);
+								
+								
+								//Sleep for piece to change movement
+								
+								Thread.sleep(500);
+								
+								
 								i++;
 							}
 							else
 							{
 								System.out.println("Not allowed");
 							}
-						} catch (UnreadableException | IOException  e) {
+						} catch (UnreadableException | IOException | InterruptedException  e) {
 							// TODO Auto-generated catch block
 							e.printStackTrace();
 						}
@@ -301,53 +312,33 @@ public class manager extends Agent {
 		}
 	}
 
-	private boolean checkMovement(Position replyContent, Agent myAgent) throws IOException {
+	private boolean checkMovement(Position replyContent, Agent myAgent, Position previousPosition) throws IOException {
+		
+		System.out.println(previousPosition.getX() + "," + previousPosition.getY()+ " to " + replyContent.getX() + "," + replyContent.getY());
+		
 			
-			System.out.println("Checking Movement");
-			
-			for(int i = 0; i < 10; i ++)
-			{
-				ACLMessage msg = new ACLMessage(ACLMessage.REQUEST);
-				msg.setContentObject("Checking movement");
-
-				
-				msg.addReceiver(pieces.get(i).getAgent());
-				myAgent.send(msg);	
-				
-				try {
-					Thread.sleep(2000);
-				} catch (InterruptedException e1) {
-					// TODO Auto-generated catch block
-					e1.printStackTrace();
-				}
-				
-				ACLMessage reply = receive();
-				if (reply != null) {
-
-					if (reply.getPerformative() == ACLMessage.INFORM) {
-
-						try {
-							//System.out.println(myAgent.getAID().getLocalName() + ": " + msg.getSender().getLocalName() + "Sent a team member!");
-
-							Position content = (Position) reply.getContentObject();
-						
-							
-							if(content.getX() == replyContent.getX() && content.getY() == replyContent.getY())
-							{
-								return false;
-							}
-							//team.add(content);
-
-						} catch (UnreadableException e) {
-							// TODO Auto-generated catch block
-							e.printStackTrace();
-						}
-					}
-				}
-			
-			}
-		return true;
+		//verificar se apenas se move numa direcao - nao se pode mover na diagonal
+		if(replyContent.getX()!= previousPosition.getX() && replyContent.getY()!= previousPosition.getY())
+		{
+			return false;
 		}
+		
+		//verificar se apenas se move uma unidade
+		if( Math.abs(replyContent.getX() - previousPosition.getX()) > 1 || Math.abs(replyContent.getY() - previousPosition.getY()) > 1 )
+		{
+			return false;
+		}
+		
+		//verificar se existe alguma peça nessa posiçao
+		for(int i = 0; i < 10; i ++)
+		{							
+			if(pieces.get(i).getPosition().getX() == replyContent.getX() && pieces.get(i).getPosition().getY() == replyContent.getY())
+			{
+				return false;
+			}
+		}
+		return true;
+	}
 	
 	private ArrayList<Position> checkSurroundings(int i)
 	{
@@ -355,13 +346,13 @@ public class manager extends Agent {
 		//we know it is in the first team
 		if(i < 5)
 		{
-			for (int aux = 0; aux < 5; aux ++)
+			for (int aux = 5; aux < 10; aux ++)
 			{
 				//check if its neighbour in X
-				if(pieces.get(i).getPosition().getX() - 7 < pieces.get(aux).getPosition().getX() || pieces.get(i).getPosition().getX() + 7 > pieces.get(aux).getPosition().getX())
+				if( Math.abs(pieces.get(i).getPosition().getX() - pieces.get(aux).getPosition().getX()) <= 7)
 				{
 					//check if its neighbour in Y
-					if(pieces.get(i).getPosition().getY() - 7 < pieces.get(aux).getPosition().getY() || pieces.get(i).getPosition().getY() + 7 > pieces.get(aux).getPosition().getY())
+					if( Math.abs(pieces.get(i).getPosition().getY() - pieces.get(aux).getPosition().getY()) <= 7)
 					{
 						returnList.add(pieces.get(aux).getPosition());
 					}
@@ -370,13 +361,13 @@ public class manager extends Agent {
 		}
 		else
 		{
-			for (int aux = 5; aux < 10; aux ++)
+			for (int aux = 0; aux < 5; aux ++)
 			{
 				//check if its neighbour in X
-				if(pieces.get(i).getPosition().getX() - 7 < pieces.get(aux).getPosition().getX() || pieces.get(i).getPosition().getX() + 7 > pieces.get(aux).getPosition().getX())
+				if( Math.abs(pieces.get(i).getPosition().getX() - pieces.get(aux).getPosition().getX()) <= 7)
 				{
 					//check if its neighbour in Y
-					if(pieces.get(i).getPosition().getY() - 7 < pieces.get(aux).getPosition().getY() || pieces.get(i).getPosition().getY() + 7 > pieces.get(aux).getPosition().getY())
+					if( Math.abs(pieces.get(i).getPosition().getY() - pieces.get(aux).getPosition().getY()) <= 7)
 					{
 						returnList.add(pieces.get(aux).getPosition());
 					}

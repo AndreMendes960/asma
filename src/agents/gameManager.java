@@ -20,6 +20,8 @@ public class gameManager extends Agent{
 	
 	private ArrayList<AID> team;
 	
+	private String teamName = null;
+	
 	protected void setup() {
 		super.setup();
 		
@@ -78,37 +80,88 @@ public class gameManager extends Agent{
 						System.out.println("Someone wants to move");
 						
 						try {
-							Thread.sleep(4000);
-						} catch (InterruptedException e) {
-							// TODO Auto-generated catch block
-							e.printStackTrace();
-						}
-						
-						for(int i = 0; i<4; i++) 
-						{
-							ACLMessage replies = receive();
+							ArrayList<Position> movingPieceList =(ArrayList<Position>) msg.getContentObject();
 							
-							if(replies != null && replies.getPerformative() == ACLMessage.INFORM)
+							if(teamName == null)
 							{
-								System.out.println("receiving replies from other pieces");
+								if(movingPieceList.get(movingPieceList.size() - 1).getY() == 0)
+								{
+									teamName = "Team A";
+								}
+								else	
+								{
+									teamName = "Team B";
+								}
 							}
 							
-						}
+							Thread.sleep(3000);
+
+							ArrayList<ArrayList<Position>> listAllPieces = new ArrayList<ArrayList<Position>>();
+							
+							listAllPieces.add(movingPieceList);
 						
-						//at the end of everything, we just have to send a position  to the piece
-						
-						ACLMessage posReply = new ACLMessage(ACLMessage.CONFIRM);
-						
-						try {
-							posReply.setContentObject(new Position(110,0));
-						} catch (IOException e) {
+							for(int i = 0; i<4; i++) 
+							{
+								ACLMessage replies = receive();
+								
+								if(replies != null && replies.getPerformative() == ACLMessage.INFORM)
+								{
+									//System.out.println("receiving replies from other pieces");
+									listAllPieces.add((ArrayList<Position>) replies.getContentObject());
+								}
+								
+							}
+							
+							int inc = 0;
+							for(int i = 0; i < listAllPieces.size(); i++)
+							{
+								//check size of all arrays. If all of them contain only 1 Piece, there are no enemy pieces on the surroundings
+								if(listAllPieces.get(i).size() > 1)
+								{
+									System.out.println("Enemie found : " + listAllPieces.get(i).size());
+									inc++;
+								}
+								
+							}
+							
+							Position moveToPos = new Position(0,0);
+							
+							if(inc == 0)
+							{
+								System.out.println("NO SURROUNDING ENEMIES. EXPLORING");
+								
+								if(teamName == "Team A")
+								{
+									moveToPos.setY(movingPieceList.get(movingPieceList.size() - 1).getY() + 1);
+								}
+								else
+								{
+									moveToPos.setY(movingPieceList.get(movingPieceList.size() - 1).getY() + 1);
+								}
+								
+							}
+							else
+							{
+								System.out.println("SURROUNDING ENEMIES FOUND. ENGAGING");
+							}
+							
+							
+							
+							//at the end of everything, we just have to send a position  to the piece
+							
+							ACLMessage posReply = new ACLMessage(ACLMessage.CONFIRM);
+							
+							
+							posReply.setContentObject(moveToPos);
+							
+							posReply.addReceiver(msg.getSender());
+							
+							myAgent.send(posReply);
+							
+						} catch (IOException | InterruptedException | UnreadableException e) {
 							// TODO Auto-generated catch block
 							e.printStackTrace();
 						}
-						
-						posReply.addReceiver(msg.getSender());
-						
-						myAgent.send(posReply);
 						
 					}
 				}
