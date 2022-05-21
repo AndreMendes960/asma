@@ -118,7 +118,7 @@ public class gameManager extends Agent{
 								//check size of all arrays. If all of them contain only 1 Piece, there are no enemy pieces on the surroundings
 								if(listAllPieces.get(i).size() > 1)
 								{
-									System.out.println("Enemie found : " + listAllPieces.get(i).size());
+
 									inc++;
 								}
 								
@@ -136,23 +136,55 @@ public class gameManager extends Agent{
 								}
 								else
 								{
-									moveToPos.setY(movingPieceList.get(movingPieceList.size() - 1).getY() + 1);
+									moveToPos.setY(movingPieceList.get(movingPieceList.size() - 1).getY() - 1);
 								}
 								
 							}
 							else
 							{
 								System.out.println("SURROUNDING ENEMIES FOUND. ENGAGING");
+								//first, find the closest enemies to all the pieces
+								int minDistance = 9999;
+								Position target = new Position(0,0);
+								for(int i = 0; i < listAllPieces.size(); i++)
+								{
+									//check if the size is bigger than 1. If it isnt, means the list only contains the position of the piece and not enemy pieces
+									if(listAllPieces.get(i).size() > 1)
+									{
+										for(int j = 0; j < listAllPieces.get(i).size() - 1; j++)
+										{
+											Position posToCalculate = listAllPieces.get(i).get(j);											
+											//calculate the sum of all distances
+											int newDist = 0;
+											for (int k = 0; k < team.size(); k++)
+											{
+												newDist = newDist + Math.abs(posToCalculate.getX() - listAllPieces.get(k).get(listAllPieces.get(k).size() - 1).getX()) +  Math.abs(posToCalculate.getY() - listAllPieces.get(k).get(listAllPieces.get(k).size() - 1).getY());
+											}
+											
+											//System.out.println("For piece : " + posToCalculate.getX() + ","+ posToCalculate.getY() + "distance is : " + newDist);
+											
+											if(newDist < minDistance)
+											{
+												minDistance = newDist;
+												target = posToCalculate;
+											}
+											
+										}
+									}
+								}
+								
+								System.out.println("Target is : " + target.getX() + "," + target.getY());
+								
+								
 							}
-							
-							
-							
+
 							//at the end of everything, we just have to send a position  to the piece
 							
 							ACLMessage posReply = new ACLMessage(ACLMessage.CONFIRM);
 							
 							
-							posReply.setContentObject(moveToPos);
+							//posReply.setContentObject(moveToPos);
+							posReply.setContentObject(new Position(movingPieceList.get(movingPieceList.size()-1).getX(),movingPieceList.get(movingPieceList.size()-1).getY()));
 							
 							posReply.addReceiver(msg.getSender());
 							

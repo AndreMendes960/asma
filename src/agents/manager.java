@@ -153,8 +153,33 @@ public class manager extends Agent {
 						{
 							try {
 								msg1.setContentObject(managers.get(0));
-								initialPosition.setContentObject(new Position( n*7, 0));
-								pieces.get(n).setPosition(new Position( n*7, 0));
+								//initialPosition.setContentObject(new Position( n*7, 1));
+								//pieces.get(n).setPosition(new Position( n*7, 1));
+								if(n == 0)
+								{
+									initialPosition.setContentObject(new Position( 3, 3));
+									pieces.get(n).setPosition(new Position( 3, 3));
+								}
+								else if(n == 1)
+								{
+									initialPosition.setContentObject(new Position( 30, 1));
+									pieces.get(n).setPosition(new Position( 30, 1));
+								}
+								else if(n == 2)
+								{
+									initialPosition.setContentObject(new Position( 31, 1));
+									pieces.get(n).setPosition(new Position( 31, 1));
+								}
+								else if(n == 3)
+								{
+									initialPosition.setContentObject(new Position( 32, 1));
+									pieces.get(n).setPosition(new Position( 32, 1));
+								}
+								else if(n == 4)
+								{
+									initialPosition.setContentObject(new Position( 33, 1));
+									pieces.get(n).setPosition(new Position( 33, 1));
+								}
 							} catch (IOException e) {
 								// TODO Auto-generated catch block
 								e.printStackTrace();
@@ -164,8 +189,33 @@ public class manager extends Agent {
 						{
 							try {
 								msg1.setContentObject(managers.get(1));
-								initialPosition.setContentObject(new Position(((n-5)*7),8));
-								pieces.get(n).setPosition(new Position(((n-5)*7),8));
+								//initialPosition.setContentObject(new Position(((n-5)*7),8));
+								//pieces.get(n).setPosition(new Position(((n-5)*7),8));
+								if(n == 5)
+								{
+									initialPosition.setContentObject(new Position( 3, 2));
+									pieces.get(n).setPosition(new Position( 3, 2));
+								}
+								else if(n == 6)
+								{
+									initialPosition.setContentObject(new Position( 3, 4));
+									pieces.get(n).setPosition(new Position( 3, 4));
+								}
+								else if(n == 7)
+								{
+									initialPosition.setContentObject(new Position( 2, 3));
+									pieces.get(n).setPosition(new Position( 2, 3));
+								}
+								else if(n == 8)
+								{
+									initialPosition.setContentObject(new Position( 2, 4));
+									pieces.get(n).setPosition(new Position( 2, 4));
+								}
+								else if(n == 9)
+								{
+									initialPosition.setContentObject(new Position( 33, 8));
+									pieces.get(n).setPosition(new Position( 33, 8));
+								}
 							} catch (IOException e) {
 								// TODO Auto-generated catch block
 								e.printStackTrace();
@@ -195,7 +245,8 @@ public class manager extends Agent {
 			
 			if(GameState == "Start")
 			{
-				for (int i = 0; i < 10;)
+				
+				for (int i = 0; i < 1;)
 				{
 					//System.out.println("Asking to move");
 					ACLMessage request = new ACLMessage(ACLMessage.REQUEST);
@@ -255,7 +306,7 @@ public class manager extends Agent {
 					}
 					//we need this sleep to allow for each piece to reply, because receive does not wait for a reply
 					try {
-						Thread.sleep(10000);
+						Thread.sleep(5000);
 					} catch (InterruptedException e1) {
 						// TODO Auto-generated catch block
 						e1.printStackTrace();
@@ -295,12 +346,24 @@ public class manager extends Agent {
 							{
 								System.out.println("Not allowed");
 							}
+							
+							
 						} catch (UnreadableException | IOException | InterruptedException  e) {
 							// TODO Auto-generated catch block
 							e.printStackTrace();
 						}
 						
 					}			
+				}
+				
+				//Round Final. Check all positions
+				
+				for(int i = 0; i < pieces.size(); i++)
+				{
+					if(checkEliminated(i))
+					{
+						System.out.println("Elinate piece number : " + i);
+					}
 				}
 				
 			}
@@ -334,7 +397,7 @@ public class manager extends Agent {
 		{							
 			if(pieces.get(i).getPosition().getX() == replyContent.getX() && pieces.get(i).getPosition().getY() == replyContent.getY())
 			{
-				return false;
+				return true;
 			}
 		}
 		return true;
@@ -379,6 +442,55 @@ public class manager extends Agent {
 		
 	}
 	
+	private boolean checkEliminated(int index)
+	{
+		int sides = 0;
+		if(index < 5)
+		{
+			for(int i = 5; i< 10; i++)
+			{
+				if(i !=index)
+				{
+					if(Math.abs(pieces.get(index).getPosition().getX() - pieces.get(i).getPosition().getX()) <= 1)
+					{
+						if(Math.abs(pieces.get(index).getPosition().getY() - pieces.get(i).getPosition().getY()) <= 1)
+						{
+							System.out.println("Piece no : " + index + " is surrendered by Piece no : " + i);
+							sides++;
+						}
+					}
+				}
+			}
+		}
+		else
+		{
+			for(int i = 0; i< 5; i++)
+			{
+				if(i !=index)
+				{
+					if(Math.abs(pieces.get(index).getPosition().getX() - pieces.get(i).getPosition().getX()) <= 1)
+					{
+						if(Math.abs(pieces.get(index).getPosition().getY() - pieces.get(i).getPosition().getY()) <= 1)
+						{
+							System.out.println("Piece no : " + index + " is surrendered by Piece no : " + i);
+							sides++;
+						}
+					}
+				}
+			}
+		}
+		
+		
+		
+		//System.out.println("Piece no : " + index + "Is surrendered in : " + sides + "corners");
+		
+		if(sides == 4)
+		{
+			return true;
+		}
+		
+		return false;
+	}
 }
 	
 	

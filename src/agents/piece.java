@@ -128,7 +128,7 @@ public class piece extends Agent {
 							//askSurr.addReceiver(msg.getSender());
 							//myAgent.send(askSurr);
 							
-							Thread.sleep(10000);
+							Thread.sleep(5000);
 							
 							ACLMessage nextMove = receive();
 							
