@@ -246,114 +246,102 @@ public class manager extends Agent {
 			if(GameState == "Start")
 			{
 				
-				for (int i = 0; i < 1;)
+				for (int i = 0; i < pieces.size();)
 				{
-					//System.out.println("Asking to move");
-					ACLMessage request = new ACLMessage(ACLMessage.REQUEST);
-					try {
-						request.setContentObject(checkSurroundings(i));
-					} catch (IOException e2) {
-						// TODO Auto-generated catch block
-						e2.printStackTrace();
-					}
-					request.addReceiver(pieces.get(i).getAgent());
-					myAgent.send(request);
-					
-					try {
-						Thread.sleep(2000);
-					} catch (InterruptedException e2) {
-						// TODO Auto-generated catch block
-						e2.printStackTrace();
-					}
-					
-					if(i < 5)
-					{
-						for (int aux = 0; aux < 5; aux++)
-						{
-							if(aux != i) 
-							{
-								ACLMessage surrInform = new ACLMessage(ACLMessage.INFORM);
-								try {
-									surrInform.setContentObject(checkSurroundings(aux));
-								} catch (IOException e1) {
-									// TODO Auto-generated catch block
-									e1.printStackTrace();
+					if (pieces.get(i).isAvailable()) {
+						//System.out.println("Asking to move");
+						ACLMessage request = new ACLMessage(ACLMessage.REQUEST);
+						try {
+							request.setContentObject(checkSurroundings(i));
+						} catch (IOException e2) {
+							// TODO Auto-generated catch block
+							e2.printStackTrace();
+						}
+						request.addReceiver(pieces.get(i).getAgent());
+						myAgent.send(request);
+						try {
+							Thread.sleep(2000);
+						} catch (InterruptedException e2) {
+							// TODO Auto-generated catch block
+							e2.printStackTrace();
+						}
+						if (i < 5) {
+							for (int aux = 0; aux < 5; aux++) {
+								if (aux != i) {
+									ACLMessage surrInform = new ACLMessage(ACLMessage.INFORM);
+									try {
+										surrInform.setContentObject(checkSurroundings(aux));
+									} catch (IOException e1) {
+										// TODO Auto-generated catch block
+										e1.printStackTrace();
+									}
+									surrInform.addReceiver(pieces.get(aux).getAgent());
+									myAgent.send(surrInform);
 								}
-								surrInform.addReceiver(pieces.get(aux).getAgent());
-								myAgent.send(surrInform);
+							}
+						} else {
+							for (int aux = 5; aux <= 9; aux++) {
+								if (aux != i) {
+									ACLMessage surrInform = new ACLMessage(ACLMessage.INFORM);
+									try {
+										surrInform.setContentObject(checkSurroundings(aux));
+									} catch (IOException e1) {
+										// TODO Auto-generated catch block
+										e1.printStackTrace();
+									}
+									surrInform.addReceiver(pieces.get(aux).getAgent());
+									myAgent.send(surrInform);
+
+									System.out.println("Sent Inform");
+								}
 							}
 						}
+						//we need this sleep to allow for each piece to reply, because receive does not wait for a reply
+						try {
+							Thread.sleep(5000);
+						} catch (InterruptedException e1) {
+							// TODO Auto-generated catch block
+							e1.printStackTrace();
+						}
+						ACLMessage reply = receive();
+						if (reply != null && reply.getPerformative() == ACLMessage.ACCEPT_PROPOSAL) {
+
+							//Only then do we receive a reply regarding the desired movement of the piece
+							try {
+								Position movePos = (Position) reply.getContentObject();
+
+								//System.out.print("Received Position piece wants to move to");
+								//Movement is allowed
+								if (checkMovement(movePos, myAgent, pieces.get(i).getPosition())) {
+									System.out.println("Allowed");
+									ACLMessage confirmMovement = new ACLMessage(ACLMessage.CONFIRM);
+									confirmMovement.addReceiver(pieces.get(i).getAgent());
+									confirmMovement.setContentObject(movePos);
+
+									myAgent.send(confirmMovement);
+
+									pieces.get(i).setPosition(movePos);
+
+									//Sleep for piece to change movement
+
+									Thread.sleep(500);
+
+									i++;
+								} else {
+									System.out.println("Not allowed");
+								}
+
+							} catch (UnreadableException | IOException | InterruptedException e) {
+								// TODO Auto-generated catch block
+								e.printStackTrace();
+							}
+
+						} 
 					}
 					else
 					{
-						for (int aux = 5; aux <= 9; aux++)
-						{
-							if(aux != i) 
-							{
-								ACLMessage surrInform = new ACLMessage(ACLMessage.INFORM);
-								try {
-									surrInform.setContentObject(checkSurroundings(aux));
-								} catch (IOException e1) {
-									// TODO Auto-generated catch block
-									e1.printStackTrace();
-								}
-								surrInform.addReceiver(pieces.get(aux).getAgent());
-								myAgent.send(surrInform);
-								
-								System.out.println("Sent Inform");	
-							}
-						}
+						System.out.println("Piece no : " + i + "Is eliminated");
 					}
-					//we need this sleep to allow for each piece to reply, because receive does not wait for a reply
-					try {
-						Thread.sleep(5000);
-					} catch (InterruptedException e1) {
-						// TODO Auto-generated catch block
-						e1.printStackTrace();
-					}
-					ACLMessage reply = receive();
-					
-					if(reply != null && reply.getPerformative() == ACLMessage.ACCEPT_PROPOSAL)
-					{
-						
-						//Only then do we receive a reply regarding the desired movement of the piece
-						try {
-							Position movePos = (Position) reply.getContentObject();
-							
-							//System.out.print("Received Position piece wants to move to");
-							//Movement is allowed
-							if(checkMovement(movePos, myAgent, pieces.get(i).getPosition()))
-							{
-								System.out.println("Allowed");
-								ACLMessage confirmMovement = new ACLMessage(ACLMessage.CONFIRM);
-								confirmMovement.addReceiver(pieces.get(i).getAgent());
-								confirmMovement.setContentObject(movePos);
-								
-								myAgent.send(confirmMovement);
-								
-								
-								pieces.get(i).setPosition(movePos);
-								
-								
-								//Sleep for piece to change movement
-								
-								Thread.sleep(500);
-								
-								
-								i++;
-							}
-							else
-							{
-								System.out.println("Not allowed");
-							}
-							
-							
-						} catch (UnreadableException | IOException | InterruptedException  e) {
-							// TODO Auto-generated catch block
-							e.printStackTrace();
-						}
-						
-					}			
 				}
 				
 				//Round Final. Check all positions
@@ -363,6 +351,8 @@ public class manager extends Agent {
 					if(checkEliminated(i))
 					{
 						System.out.println("Elinate piece number : " + i);
+						pieces.get(i).setAvailable(false);
+						pieces.get(i).setPosition(new Position(100, 100));
 					}
 				}
 				
