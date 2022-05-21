@@ -3,6 +3,7 @@ package agents;
 import java.io.IOException;
 import java.util.ArrayList;
 
+import Classes.ANSIConstants;
 import Classes.InformPosition;
 import Classes.Position;
 import jade.core.AID;
@@ -26,7 +27,11 @@ public class gameManager extends Agent{
 	String targetLeft;
 	String targetRight;
 	
+	String textColor;
+	
 	int minDistance = 9999;
+	
+	int roundIncr = 0;
 	
 	private String teamName = null;
 	
@@ -40,7 +45,7 @@ public class gameManager extends Agent{
 		targetLower = null;
 		targetLeft = null;
 		targetRight = null;
-				
+		textColor = null;		
 		
 		DFAgentDescription dfd = new DFAgentDescription();
 		dfd.setName(getAID());
@@ -100,10 +105,12 @@ public class gameManager extends Agent{
 								if(movingPieceList.get(movingPieceList.size() - 1).getY() == 0)
 								{
 									teamName = "Team A";
+									textColor = ANSIConstants.ANSI_BLUE;
 								}
 								else	
 								{
 									teamName = "Team B";
+									textColor = ANSIConstants.ANSI_RED;
 								}
 							}
 							
@@ -141,7 +148,7 @@ public class gameManager extends Agent{
 							
 							if(inc == 0)
 							{
-								System.out.println("NO SURROUNDING ENEMIES. EXPLORING");
+								System.out.println( textColor + "No enemies close by. Exploring" + ANSIConstants.ANSI_RESET);
 								
 								if(teamName == "Team A")
 								{
@@ -155,7 +162,7 @@ public class gameManager extends Agent{
 							}
 							else
 							{
-								System.out.println("SURROUNDING ENEMIES FOUND. ENGAGING");
+								System.out.println(textColor + "Enemies Found" + ANSIConstants.ANSI_RESET);
 								//first, find the closest enemies to all the pieces
 								
 								//reset minDistance in case target moved
@@ -181,7 +188,6 @@ public class gameManager extends Agent{
 												//if the target is the same, we dont need to change 
 												//if it is different, reset all the positions
 												minDistance = newDist;
-												System.out.println("New target found " + target.getX() + ","+ target.getY() + " To " + posToCalculate.getX()+"," + posToCalculate.getY());
 												target = posToCalculate;
 												targetUpper = null;
 												targetLower = null;
@@ -193,20 +199,47 @@ public class gameManager extends Agent{
 									}	
 								}
 
-								System.out.println("Target is : " + target.getX() + "," + target.getY());
+								System.out.println(textColor + "Target is : " + target.getX() + "," + target.getY()  + ANSIConstants.ANSI_RESET);
 								
-								//Here the target is selected, we just have to move towards it
+								//We check if the piece is alone. If it is alone in comparison to all the other members, we then move this piece towards the group
 								
-								//we give priority moving in the X axis, then on the Y axis
+								ArrayList<Integer> TeamPosX = new ArrayList<Integer>();
+								ArrayList<Integer> TeamPosY = new ArrayList<Integer>();
 								
-								//Means the piece is by the targets left.
-								//if(target.getX() > movingPieceList.get(movingPieceList.size()-1).getX())
-								if(true)
+								for( int z = 0; z< 5 ; z++)
+								{
+									//check if piece is eliminated
+									if(listAllPieces.get(z).get(listAllPieces.get(z).size() - 1).getX() != 100)
+									{
+										TeamPosX.add(listAllPieces.get(z).get(listAllPieces.get(z).size() - 1).getX());
+										TeamPosY.add(listAllPieces.get(z).get(listAllPieces.get(z).size() - 1).getY());
+									}
+								}
+								
+								//check the median value
+								double medianX, medianY;
+								
+								if (TeamPosX.size() % 2 == 0)
+								    medianX = (TeamPosX.get(TeamPosX.size()/2) + TeamPosX.get(TeamPosX.size()/2 - 1))/2;
+								else
+								    medianX = (TeamPosX.get(TeamPosX.size()/2));
+								if (TeamPosY.size() % 2 == 0)
+								    medianY = (TeamPosY.get(TeamPosY.size()/2) + TeamPosY.get(TeamPosY.size()/2 - 1))/2;
+								else
+								    medianY = (TeamPosY.get(TeamPosY.size()/2));
+								
+								if(Math.abs(movingPieceList.get(movingPieceList.size() - 1).getX() - medianX) > 5)
+								{
+									System.out.println(textColor + "Too far away, approaching Team" + ANSIConstants.ANSI_RESET);
+								}
+								else if(Math.abs(movingPieceList.get(movingPieceList.size() - 1).getY() - medianY) > 5)
+								{
+									System.out.println(textColor + "Too far away, approaching Team" + ANSIConstants.ANSI_RESET);
+								}
+								else
 								{
 									//the piece takes the targets left side
 									if(targetLeft == null || targetLeft.equals(msg.getSender().getLocalName()))
-									{
-										System.out.println("Engaging Left");
 										targetLeft = msg.getSender().getLocalName();
 										//already in the correct X position, move in Y
 										if(movingPieceList.get(movingPieceList.size()-1).getX() == target.getX() - 1)
@@ -215,18 +248,18 @@ public class gameManager extends Agent{
 											{
 												moveToPos = new Position(movingPieceList.get(movingPieceList.size()-1).getX(), movingPieceList.get(movingPieceList.size()-1).getY() + 1);
 											}
-											else
+											else if(movingPieceList.get(movingPieceList.size()-1).getY() > target.getY())
 											{
 												moveToPos = new Position(movingPieceList.get(movingPieceList.size()-1).getX(), movingPieceList.get(movingPieceList.size()-1).getY() - 1);
 											}
 										}
 										else
 										{
-											if(movingPieceList.get(movingPieceList.size()-1).getX() < target.getX())
+											if(movingPieceList.get(movingPieceList.size()-1).getX() < target.getX()-1)
 											{
 												moveToPos = new Position(movingPieceList.get(movingPieceList.size()-1).getX() +1, movingPieceList.get(movingPieceList.size()-1).getY());
 											}
-											else
+											else if(movingPieceList.get(movingPieceList.size()-1).getX() > target.getX()-1)
 											{
 												moveToPos = new Position(movingPieceList.get(movingPieceList.size()-1).getX() - 1, movingPieceList.get(movingPieceList.size()-1).getY());
 											}
@@ -234,27 +267,26 @@ public class gameManager extends Agent{
 									}
 									else if( targetUpper == null || targetUpper.equals(msg.getSender().getLocalName()) )
 									{
-										System.out.println("Engaging Up");
 										targetUpper = msg.getSender().getLocalName();
 										//already in the correct Y position, move in X
 										if(movingPieceList.get(movingPieceList.size()-1).getY() == target.getY() - 1)
 										{
 											if(movingPieceList.get(movingPieceList.size()-1).getX() < target.getX())
 											{
-												moveToPos = new Position(movingPieceList.get(movingPieceList.size()-1).getX() - 1, movingPieceList.get(movingPieceList.size()-1).getY());
-											}
-											else
-											{
 												moveToPos = new Position(movingPieceList.get(movingPieceList.size()-1).getX() + 1, movingPieceList.get(movingPieceList.size()-1).getY());
+											}
+											else if(movingPieceList.get(movingPieceList.size()-1).getX() > target.getX())
+											{
+												moveToPos = new Position(movingPieceList.get(movingPieceList.size()-1).getX() - 1, movingPieceList.get(movingPieceList.size()-1).getY());
 											}
 										}
 										else
 										{
-											if(movingPieceList.get(movingPieceList.size()-1).getY() < target.getY())
+											if(movingPieceList.get(movingPieceList.size()-1).getY() < target.getY() - 1)
 											{
 												moveToPos = new Position(movingPieceList.get(movingPieceList.size()-1).getX(), movingPieceList.get(movingPieceList.size()-1).getY() + 1);
 											}
-											else
+											else if(movingPieceList.get(movingPieceList.size()-1).getY() > target.getY() - 1)
 											{
 												moveToPos = new Position(movingPieceList.get(movingPieceList.size()-1).getX(), movingPieceList.get(movingPieceList.size()-1).getY() - 1);
 											}
@@ -262,35 +294,35 @@ public class gameManager extends Agent{
 									}
 									else if( targetLower == null || targetLower.equals(msg.getSender().getLocalName()))
 									{
-										System.out.println("Engaging Low");
 										targetLower = msg.getSender().getLocalName();
 										//already in the correct Y position, move in X
 										if(movingPieceList.get(movingPieceList.size()-1).getY() == target.getY() + 1)
 										{
 											if(movingPieceList.get(movingPieceList.size()-1).getX() < target.getX())
 											{
-												moveToPos = new Position(movingPieceList.get(movingPieceList.size()-1).getX() - 1, movingPieceList.get(movingPieceList.size()-1).getY());
-											}
-											else
-											{
 												moveToPos = new Position(movingPieceList.get(movingPieceList.size()-1).getX() + 1, movingPieceList.get(movingPieceList.size()-1).getY());
+											}
+											else if (movingPieceList.get(movingPieceList.size()-1).getX() > target.getX())
+											{
+												moveToPos = new Position(movingPieceList.get(movingPieceList.size()-1).getX() - 1, movingPieceList.get(movingPieceList.size()-1).getY());
 											}
 										}
 										else
 										{
-											if(movingPieceList.get(movingPieceList.size()-1).getY() < target.getY())
+											if(movingPieceList.get(movingPieceList.size()-1).getY() < target.getY()+1)
 											{
+												
 												moveToPos = new Position(movingPieceList.get(movingPieceList.size()-1).getX(), movingPieceList.get(movingPieceList.size()-1).getY() + 1);
 											}
-											else
+											else if (movingPieceList.get(movingPieceList.size()-1).getY() > target.getY()+1)
 											{
+												
 												moveToPos = new Position(movingPieceList.get(movingPieceList.size()-1).getX(), movingPieceList.get(movingPieceList.size()-1).getY() - 1);
 											}
 										}
 									}
 									else if( targetRight == null || targetRight.equals(msg.getSender().getLocalName()))
 									{
-										System.out.println("Engaging Right");
 										targetRight = msg.getSender().getLocalName();
 										//already in the correct X position, move in Y
 										if(movingPieceList.get(movingPieceList.size()-1).getX() == target.getX() + 1)
@@ -299,24 +331,25 @@ public class gameManager extends Agent{
 											{
 												moveToPos = new Position(movingPieceList.get(movingPieceList.size()-1).getX(), movingPieceList.get(movingPieceList.size()-1).getY() + 1);
 											}
-											else
+											else if (movingPieceList.get(movingPieceList.size()-1).getY() > target.getY())
 											{
 												moveToPos = new Position(movingPieceList.get(movingPieceList.size()-1).getX(), movingPieceList.get(movingPieceList.size()-1).getY() - 1);
 											}
 										}
 										else
 										{
-											if(movingPieceList.get(movingPieceList.size()-1).getX() < target.getX())
+											if(movingPieceList.get(movingPieceList.size()-1).getX() < target.getX() + 1)
 											{
 												moveToPos = new Position(movingPieceList.get(movingPieceList.size()-1).getX() +1, movingPieceList.get(movingPieceList.size()-1).getY());
 											}
-											else
+											else if (movingPieceList.get(movingPieceList.size()-1).getX() > target.getX() + 1)
 											{
 												moveToPos = new Position(movingPieceList.get(movingPieceList.size()-1).getX() - 1, movingPieceList.get(movingPieceList.size()-1).getY());
 											}
 										}
 									}
-								}			
+								}
+									
 							}
 
 							//at the end of everything, we just have to send a position  to the piece
@@ -330,6 +363,21 @@ public class gameManager extends Agent{
 							posReply.addReceiver(msg.getSender());
 							
 							myAgent.send(posReply);
+							
+							//we use this variable for at the end of the round, reset the target
+							roundIncr++;
+							
+							if(roundIncr == 5)
+							{
+								roundIncr =0;
+								minDistance = 9999;
+								target = new Position(0,0);
+								targetLeft = null;
+								targetRight = null;
+								targetUpper = null;
+								targetLower = null;
+							}
+							
 							
 						} catch (IOException | InterruptedException | UnreadableException e) {
 							// TODO Auto-generated catch block

@@ -101,7 +101,6 @@ public class piece extends Agent {
 								current_location = initialPosContent;
 							}
 							
-							System.out.println(current_location.getX() +":"+current_location.getY());
 							
 						}
 					catch (UnreadableException e) {
@@ -116,7 +115,6 @@ public class piece extends Agent {
 					//String content = msg.getContent();
 					if(true)
 					{
-						System.out.println(myAgent.getAID().getLocalName() + " Asked to move : ");
 						try {
 							ArrayList<Position> surr = (ArrayList<Position>) msg.getContentObject();
 							surr.add(current_location);

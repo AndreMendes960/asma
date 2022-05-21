@@ -3,6 +3,7 @@ package agents;
 import java.io.IOException;
 import java.util.ArrayList;
 
+import Classes.ANSIConstants;
 import Classes.InformPosition;
 import Classes.Position;
 import jade.core.AID;
@@ -157,28 +158,28 @@ public class manager extends Agent {
 								//pieces.get(n).setPosition(new Position( n*7, 1));
 								if(n == 0)
 								{
-									initialPosition.setContentObject(new Position( 3, 3));
-									pieces.get(n).setPosition(new Position( 3, 3));
+									initialPosition.setContentObject(new Position( 3, 0));
+									pieces.get(n).setPosition(new Position( 3, 0));
 								}
 								else if(n == 1)
 								{
-									initialPosition.setContentObject(new Position( 5, 2));
-									pieces.get(n).setPosition(new Position( 5, 2));
+									initialPosition.setContentObject(new Position( 14, 0));
+									pieces.get(n).setPosition(new Position( 14, 0));
 								}
 								else if(n == 2)
 								{
-									initialPosition.setContentObject(new Position( 6, 2));
-									pieces.get(n).setPosition(new Position( 6, 2));
+									initialPosition.setContentObject(new Position( 16, 0));
+									pieces.get(n).setPosition(new Position( 16, 0));
 								}
 								else if(n == 3)
 								{
-									initialPosition.setContentObject(new Position( 7, 2));
-									pieces.get(n).setPosition(new Position( 7, 2));
+									initialPosition.setContentObject(new Position( 17, 0));
+									pieces.get(n).setPosition(new Position( 17, 0));
 								}
 								else if(n == 4)
 								{
-									initialPosition.setContentObject(new Position( 7, 3));
-									pieces.get(n).setPosition(new Position( 7, 3));
+									initialPosition.setContentObject(new Position( 17, 0));
+									pieces.get(n).setPosition(new Position( 17, 0));
 								}
 							} catch (IOException e) {
 								// TODO Auto-generated catch block
@@ -254,7 +255,6 @@ public class manager extends Agent {
 						try {
 							request.setContentObject(checkSurroundings(i));
 						} catch (IOException e2) {
-							// TODO Auto-generated catch block
 							e2.printStackTrace();
 						}
 						request.addReceiver(pieces.get(i).getAgent());
@@ -262,10 +262,11 @@ public class manager extends Agent {
 						try {
 							Thread.sleep(2000);
 						} catch (InterruptedException e2) {
-							// TODO Auto-generated catch block
 							e2.printStackTrace();
 						}
 						if (i < 5) {
+							System.out.println(ANSIConstants.ANSI_BLUE + "Piece number "+ i + " moving" + ANSIConstants.ANSI_RESET);
+							
 							for (int aux = 0; aux < 5; aux++) {
 								if (aux != i) {
 									ACLMessage surrInform = new ACLMessage(ACLMessage.INFORM);
@@ -281,6 +282,7 @@ public class manager extends Agent {
 							}
 						} else {
 							for (int aux = 5; aux <= 9; aux++) {
+								System.out.println(ANSIConstants.ANSI_RED + "Piece number "+ i + " moving" + ANSIConstants.ANSI_RESET);
 								if (aux != i) {
 									ACLMessage surrInform = new ACLMessage(ACLMessage.INFORM);
 									try {
@@ -291,8 +293,6 @@ public class manager extends Agent {
 									}
 									surrInform.addReceiver(pieces.get(aux).getAgent());
 									myAgent.send(surrInform);
-
-									System.out.println("Sent Inform");
 								}
 							}
 						}
@@ -391,7 +391,6 @@ public class manager extends Agent {
 		
 		System.out.println(previousPosition.getX() + "," + previousPosition.getY()+ " to " + replyContent.getX() + "," + replyContent.getY());
 		
-			
 		//verificar se apenas se move numa direcao - nao se pode mover na diagonal
 		if(replyContent.getX()!= previousPosition.getX() && replyContent.getY()!= previousPosition.getY())
 		{
