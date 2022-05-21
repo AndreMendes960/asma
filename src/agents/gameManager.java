@@ -39,7 +39,7 @@ public class gameManager extends Agent{
 		super.setup();
 		
 		team = new ArrayList<AID>();
-		target = new Position(0,0);
+		target = new Position(-1,-1);
 		
 		targetUpper = null;
 		targetLower = null;
@@ -173,7 +173,8 @@ public class gameManager extends Agent{
 									{
 										for(int j = 0; j < listAllPieces.get(i).size() - 1; j++)
 										{
-											Position posToCalculate = listAllPieces.get(i).get(j);											
+											
+											Position posToCalculate = listAllPieces.get(i).get(j);
 											//calculate the sum of all distances
 											int newDist = 0;
 											for (int k = 0; k < team.size(); k++)
@@ -181,12 +182,12 @@ public class gameManager extends Agent{
 												newDist = newDist + Math.abs(posToCalculate.getX() - listAllPieces.get(k).get(listAllPieces.get(k).size() - 1).getX()) +  Math.abs(posToCalculate.getY() - listAllPieces.get(k).get(listAllPieces.get(k).size() - 1).getY());
 											}
 											
-											//System.out.println("For piece : " + posToCalculate.getX() + ","+ posToCalculate.getY() + "distance is : " + newDist);
 											
 											if(newDist < minDistance && target.getX() != posToCalculate.getX() && target.getY() != posToCalculate.getY())
 											{
 												//if the target is the same, we dont need to change 
 												//if it is different, reset all the positions
+												
 												minDistance = newDist;
 												target = posToCalculate;
 												targetUpper = null;
@@ -231,15 +232,36 @@ public class gameManager extends Agent{
 								if(Math.abs(movingPieceList.get(movingPieceList.size() - 1).getX() - medianX) > 5)
 								{
 									System.out.println(textColor + "Too far away, approaching Team" + ANSIConstants.ANSI_RESET);
+									
+									if(movingPieceList.get(movingPieceList.size() - 1).getX() > medianX)
+									{
+										moveToPos = new Position(movingPieceList.get(movingPieceList.size()-1).getX() - 1,movingPieceList.get(movingPieceList.size()-1).getY());
+									}
+									else
+									{
+										moveToPos = new Position(movingPieceList.get(movingPieceList.size()-1).getX() + 1,movingPieceList.get(movingPieceList.size()-1).getY());
+									}
+									
+									
 								}
 								else if(Math.abs(movingPieceList.get(movingPieceList.size() - 1).getY() - medianY) > 5)
 								{
 									System.out.println(textColor + "Too far away, approaching Team" + ANSIConstants.ANSI_RESET);
+									if(movingPieceList.get(movingPieceList.size() - 1).getY() > medianY)
+									{
+										moveToPos = new Position(movingPieceList.get(movingPieceList.size()-1).getX() - 1,movingPieceList.get(movingPieceList.size()-1).getY()-1);
+									}
+									else
+									{
+										moveToPos = new Position(movingPieceList.get(movingPieceList.size()-1).getX() + 1,movingPieceList.get(movingPieceList.size()-1).getY()+1);
+									}
 								}
 								else
 								{
+									System.out.println(textColor + "Engaging target" + ANSIConstants.ANSI_RESET);
 									//the piece takes the targets left side
 									if(targetLeft == null || targetLeft.equals(msg.getSender().getLocalName()))
+									{
 										targetLeft = msg.getSender().getLocalName();
 										//already in the correct X position, move in Y
 										if(movingPieceList.get(movingPieceList.size()-1).getX() == target.getX() - 1)
@@ -323,6 +345,7 @@ public class gameManager extends Agent{
 									}
 									else if( targetRight == null || targetRight.equals(msg.getSender().getLocalName()))
 									{
+										System.out.println("Engaging Right");
 										targetRight = msg.getSender().getLocalName();
 										//already in the correct X position, move in Y
 										if(movingPieceList.get(movingPieceList.size()-1).getX() == target.getX() + 1)

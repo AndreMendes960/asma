@@ -281,8 +281,8 @@ public class manager extends Agent {
 								}
 							}
 						} else {
+							System.out.println(ANSIConstants.ANSI_RED + "Piece number "+ i + " moving" + ANSIConstants.ANSI_RESET);
 							for (int aux = 5; aux <= 9; aux++) {
-								System.out.println(ANSIConstants.ANSI_RED + "Piece number "+ i + " moving" + ANSIConstants.ANSI_RESET);
 								if (aux != i) {
 									ACLMessage surrInform = new ACLMessage(ACLMessage.INFORM);
 									try {
@@ -391,6 +391,9 @@ public class manager extends Agent {
 		
 		System.out.println(previousPosition.getX() + "," + previousPosition.getY()+ " to " + replyContent.getX() + "," + replyContent.getY());
 		
+		if(replyContent.getX() > 34 || replyContent.getX() < 0 || replyContent.getY() > 34 || replyContent.getY() < 0)
+			return false;
+		
 		//verificar se apenas se move numa direcao - nao se pode mover na diagonal
 		if(replyContent.getX()!= previousPosition.getX() && replyContent.getY()!= previousPosition.getY())
 		{
@@ -496,10 +499,6 @@ public class manager extends Agent {
 				}
 			}
 		}
-		
-		
-		
-		//System.out.println("Piece no : " + index + "Is surrendered in : " + sides + "corners");
 		
 		if(sides == 4)
 		{
