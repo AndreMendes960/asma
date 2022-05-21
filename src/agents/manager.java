@@ -341,19 +341,41 @@ public class manager extends Agent {
 					else
 					{
 						System.out.println("Piece no : " + i + "Is eliminated");
+						i++;
 					}
 				}
 				
 				//Round Final. Check all positions
 				
+				int eliminatedA =0 , eliminatedB = 0;
+				
 				for(int i = 0; i < pieces.size(); i++)
 				{
 					if(checkEliminated(i))
 					{
-						System.out.println("Elinate piece number : " + i);
+						System.out.println("Eliminate piece number : " + i);
 						pieces.get(i).setAvailable(false);
 						pieces.get(i).setPosition(new Position(100, 100));
+						if(i<5)
+						{
+							eliminatedA ++;
+						}
+						else
+						{
+							eliminatedB ++;
+						}
 					}
+				}
+				
+				if(eliminatedA >= 2)
+				{
+					System.out.println("Team B is the Winner");
+					GameState = "Finished";
+				}
+				else if(eliminatedB >= 2)
+				{
+					System.out.println("Team B is the Winner");
+					GameState = "Finished";
 				}
 				
 			}
