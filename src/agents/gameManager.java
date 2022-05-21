@@ -20,12 +20,27 @@ public class gameManager extends Agent{
 	
 	private ArrayList<AID> team;
 	
+	Position target;
+	String targetUpper;
+	String targetLower;
+	String targetLeft;
+	String targetRight;
+	
+	int minDistance = 9999;
+	
 	private String teamName = null;
 	
 	protected void setup() {
 		super.setup();
 		
 		team = new ArrayList<AID>();
+		target = new Position(0,0);
+		
+		targetUpper = null;
+		targetLower = null;
+		targetLeft = null;
+		targetRight = null;
+				
 		
 		DFAgentDescription dfd = new DFAgentDescription();
 		dfd.setName(getAID());
@@ -77,8 +92,6 @@ public class gameManager extends Agent{
 				{
 					if(msg.getPerformative() == ACLMessage.REQUEST)
 					{
-						System.out.println("Someone wants to move");
-						
 						try {
 							ArrayList<Position> movingPieceList =(ArrayList<Position>) msg.getContentObject();
 							
@@ -124,7 +137,7 @@ public class gameManager extends Agent{
 								
 							}
 							
-							Position moveToPos = new Position(0,0);
+							Position moveToPos = new Position(movingPieceList.get(movingPieceList.size()-1).getX(),movingPieceList.get(movingPieceList.size()-1).getY());
 							
 							if(inc == 0)
 							{
@@ -144,8 +157,8 @@ public class gameManager extends Agent{
 							{
 								System.out.println("SURROUNDING ENEMIES FOUND. ENGAGING");
 								//first, find the closest enemies to all the pieces
-								int minDistance = 9999;
-								Position target = new Position(0,0);
+								
+								//reset minDistance in case target moved
 								for(int i = 0; i < listAllPieces.size(); i++)
 								{
 									//check if the size is bigger than 1. If it isnt, means the list only contains the position of the piece and not enemy pieces
@@ -163,19 +176,147 @@ public class gameManager extends Agent{
 											
 											//System.out.println("For piece : " + posToCalculate.getX() + ","+ posToCalculate.getY() + "distance is : " + newDist);
 											
-											if(newDist < minDistance)
+											if(newDist < minDistance && target.getX() != posToCalculate.getX() && target.getY() != posToCalculate.getY())
 											{
+												//if the target is the same, we dont need to change 
+												//if it is different, reset all the positions
 												minDistance = newDist;
+												System.out.println("New target found " + target.getX() + ","+ target.getY() + " To " + posToCalculate.getX()+"," + posToCalculate.getY());
 												target = posToCalculate;
+												targetUpper = null;
+												targetLower = null;
+												targetRight = null;
+												targetLeft = null;
+												
 											}
-											
 										}
-									}
+									}	
 								}
-								
+
 								System.out.println("Target is : " + target.getX() + "," + target.getY());
 								
+								//Here the target is selected, we just have to move towards it
 								
+								//we give priority moving in the X axis, then on the Y axis
+								
+								//Means the piece is by the targets left.
+								//if(target.getX() > movingPieceList.get(movingPieceList.size()-1).getX())
+								if(true)
+								{
+									//the piece takes the targets left side
+									if(targetLeft == null || targetLeft.equals(msg.getSender().getLocalName()))
+									{
+										System.out.println("Engaging Left");
+										targetLeft = msg.getSender().getLocalName();
+										//already in the correct X position, move in Y
+										if(movingPieceList.get(movingPieceList.size()-1).getX() == target.getX() - 1)
+										{
+											if(movingPieceList.get(movingPieceList.size()-1).getY() < target.getY())
+											{
+												moveToPos = new Position(movingPieceList.get(movingPieceList.size()-1).getX(), movingPieceList.get(movingPieceList.size()-1).getY() + 1);
+											}
+											else
+											{
+												moveToPos = new Position(movingPieceList.get(movingPieceList.size()-1).getX(), movingPieceList.get(movingPieceList.size()-1).getY() - 1);
+											}
+										}
+										else
+										{
+											if(movingPieceList.get(movingPieceList.size()-1).getX() < target.getX())
+											{
+												moveToPos = new Position(movingPieceList.get(movingPieceList.size()-1).getX() +1, movingPieceList.get(movingPieceList.size()-1).getY());
+											}
+											else
+											{
+												moveToPos = new Position(movingPieceList.get(movingPieceList.size()-1).getX() - 1, movingPieceList.get(movingPieceList.size()-1).getY());
+											}
+										}
+									}
+									else if( targetUpper == null || targetUpper.equals(msg.getSender().getLocalName()) )
+									{
+										System.out.println("Engaging Up");
+										targetUpper = msg.getSender().getLocalName();
+										//already in the correct Y position, move in X
+										if(movingPieceList.get(movingPieceList.size()-1).getY() == target.getY() - 1)
+										{
+											if(movingPieceList.get(movingPieceList.size()-1).getX() < target.getX())
+											{
+												moveToPos = new Position(movingPieceList.get(movingPieceList.size()-1).getX() - 1, movingPieceList.get(movingPieceList.size()-1).getY());
+											}
+											else
+											{
+												moveToPos = new Position(movingPieceList.get(movingPieceList.size()-1).getX() + 1, movingPieceList.get(movingPieceList.size()-1).getY());
+											}
+										}
+										else
+										{
+											if(movingPieceList.get(movingPieceList.size()-1).getY() < target.getY())
+											{
+												moveToPos = new Position(movingPieceList.get(movingPieceList.size()-1).getX(), movingPieceList.get(movingPieceList.size()-1).getY() + 1);
+											}
+											else
+											{
+												moveToPos = new Position(movingPieceList.get(movingPieceList.size()-1).getX(), movingPieceList.get(movingPieceList.size()-1).getY() - 1);
+											}
+										}
+									}
+									else if( targetLower == null || targetLower.equals(msg.getSender().getLocalName()))
+									{
+										System.out.println("Engaging Low");
+										targetLower = msg.getSender().getLocalName();
+										//already in the correct Y position, move in X
+										if(movingPieceList.get(movingPieceList.size()-1).getY() == target.getY() + 1)
+										{
+											if(movingPieceList.get(movingPieceList.size()-1).getX() < target.getX())
+											{
+												moveToPos = new Position(movingPieceList.get(movingPieceList.size()-1).getX() - 1, movingPieceList.get(movingPieceList.size()-1).getY());
+											}
+											else
+											{
+												moveToPos = new Position(movingPieceList.get(movingPieceList.size()-1).getX() + 1, movingPieceList.get(movingPieceList.size()-1).getY());
+											}
+										}
+										else
+										{
+											if(movingPieceList.get(movingPieceList.size()-1).getY() < target.getY())
+											{
+												moveToPos = new Position(movingPieceList.get(movingPieceList.size()-1).getX(), movingPieceList.get(movingPieceList.size()-1).getY() + 1);
+											}
+											else
+											{
+												moveToPos = new Position(movingPieceList.get(movingPieceList.size()-1).getX(), movingPieceList.get(movingPieceList.size()-1).getY() - 1);
+											}
+										}
+									}
+									else if( targetRight == null || targetRight.equals(msg.getSender().getLocalName()))
+									{
+										System.out.println("Engaging Right");
+										targetRight = msg.getSender().getLocalName();
+										//already in the correct X position, move in Y
+										if(movingPieceList.get(movingPieceList.size()-1).getX() == target.getX() + 1)
+										{
+											if(movingPieceList.get(movingPieceList.size()-1).getY() < target.getY())
+											{
+												moveToPos = new Position(movingPieceList.get(movingPieceList.size()-1).getX(), movingPieceList.get(movingPieceList.size()-1).getY() + 1);
+											}
+											else
+											{
+												moveToPos = new Position(movingPieceList.get(movingPieceList.size()-1).getX(), movingPieceList.get(movingPieceList.size()-1).getY() - 1);
+											}
+										}
+										else
+										{
+											if(movingPieceList.get(movingPieceList.size()-1).getX() < target.getX())
+											{
+												moveToPos = new Position(movingPieceList.get(movingPieceList.size()-1).getX() +1, movingPieceList.get(movingPieceList.size()-1).getY());
+											}
+											else
+											{
+												moveToPos = new Position(movingPieceList.get(movingPieceList.size()-1).getX() - 1, movingPieceList.get(movingPieceList.size()-1).getY());
+											}
+										}
+									}
+								}			
 							}
 
 							//at the end of everything, we just have to send a position  to the piece
@@ -184,7 +325,7 @@ public class gameManager extends Agent{
 							
 							
 							//posReply.setContentObject(moveToPos);
-							posReply.setContentObject(new Position(movingPieceList.get(movingPieceList.size()-1).getX(),movingPieceList.get(movingPieceList.size()-1).getY()));
+							posReply.setContentObject(moveToPos);
 							
 							posReply.addReceiver(msg.getSender());
 							

@@ -162,23 +162,23 @@ public class manager extends Agent {
 								}
 								else if(n == 1)
 								{
-									initialPosition.setContentObject(new Position( 30, 1));
-									pieces.get(n).setPosition(new Position( 30, 1));
+									initialPosition.setContentObject(new Position( 5, 2));
+									pieces.get(n).setPosition(new Position( 5, 2));
 								}
 								else if(n == 2)
 								{
-									initialPosition.setContentObject(new Position( 31, 1));
-									pieces.get(n).setPosition(new Position( 31, 1));
+									initialPosition.setContentObject(new Position( 6, 2));
+									pieces.get(n).setPosition(new Position( 6, 2));
 								}
 								else if(n == 3)
 								{
-									initialPosition.setContentObject(new Position( 32, 1));
-									pieces.get(n).setPosition(new Position( 32, 1));
+									initialPosition.setContentObject(new Position( 7, 2));
+									pieces.get(n).setPosition(new Position( 7, 2));
 								}
 								else if(n == 4)
 								{
-									initialPosition.setContentObject(new Position( 33, 1));
-									pieces.get(n).setPosition(new Position( 33, 1));
+									initialPosition.setContentObject(new Position( 7, 3));
+									pieces.get(n).setPosition(new Position( 7, 3));
 								}
 							} catch (IOException e) {
 								// TODO Auto-generated catch block
@@ -246,7 +246,7 @@ public class manager extends Agent {
 			if(GameState == "Start")
 			{
 				
-				for (int i = 0; i < pieces.size();)
+				for (int i = 0; i < 10;)
 				{
 					if (pieces.get(i).isAvailable()) {
 						//System.out.println("Asking to move");
@@ -461,32 +461,38 @@ public class manager extends Agent {
 		{
 			for(int i = 5; i< 10; i++)
 			{
-				if(i !=index)
+				if(Math.abs(pieces.get(index).getPosition().getX() - pieces.get(i).getPosition().getX()) == 1)
 				{
-					if(Math.abs(pieces.get(index).getPosition().getX() - pieces.get(i).getPosition().getX()) <= 1)
+					if(Math.abs(pieces.get(index).getPosition().getY() - pieces.get(i).getPosition().getY()) == 0)
 					{
-						if(Math.abs(pieces.get(index).getPosition().getY() - pieces.get(i).getPosition().getY()) <= 1)
-						{
-							System.out.println("Piece no : " + index + " is surrendered by Piece no : " + i);
-							sides++;
-						}
+						sides++;
 					}
 				}
-			}
+				else if(Math.abs(pieces.get(index).getPosition().getX() - pieces.get(i).getPosition().getX()) == 0)
+				{
+					if(Math.abs(pieces.get(index).getPosition().getY() - pieces.get(i).getPosition().getY()) == 1)
+					{
+						sides++;
+					}
+				}
+		}
 		}
 		else
 		{
 			for(int i = 0; i< 5; i++)
 			{
-				if(i !=index)
+				if(Math.abs(pieces.get(index).getPosition().getX() - pieces.get(i).getPosition().getX()) == 1)
 				{
-					if(Math.abs(pieces.get(index).getPosition().getX() - pieces.get(i).getPosition().getX()) <= 1)
+					if(Math.abs(pieces.get(index).getPosition().getY() - pieces.get(i).getPosition().getY()) == 0)
 					{
-						if(Math.abs(pieces.get(index).getPosition().getY() - pieces.get(i).getPosition().getY()) <= 1)
-						{
-							System.out.println("Piece no : " + index + " is surrendered by Piece no : " + i);
-							sides++;
-						}
+						sides++;
+					}
+				}
+				else if(Math.abs(pieces.get(index).getPosition().getX() - pieces.get(i).getPosition().getX()) == 0)
+				{
+					if(Math.abs(pieces.get(index).getPosition().getY() - pieces.get(i).getPosition().getY()) == 1)
+					{
+						sides++;
 					}
 				}
 			}

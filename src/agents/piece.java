@@ -116,7 +116,7 @@ public class piece extends Agent {
 					//String content = msg.getContent();
 					if(true)
 					{
-						System.out.println(myAgent.getAID().getLocalName() + " Asked to move : " + current_location.getX());
+						System.out.println(myAgent.getAID().getLocalName() + " Asked to move : ");
 						try {
 							ArrayList<Position> surr = (ArrayList<Position>) msg.getContentObject();
 							surr.add(current_location);
@@ -136,7 +136,6 @@ public class piece extends Agent {
 							if(nextMove != null && nextMove.getPerformative() == ACLMessage.CONFIRM)
 							{
 								Position nextPos = (Position) nextMove.getContentObject();
-								System.out.println("Sending Accept Proposal");
 								
 								ACLMessage moveReply = new ACLMessage(ACLMessage.ACCEPT_PROPOSAL);
 								moveReply.setContentObject(nextPos);
@@ -175,7 +174,6 @@ public class piece extends Agent {
 				}
 				else if (msg.getPerformative() == ACLMessage.CONFIRM)
 				{
-					System.out.println("I have been authorized to move");
 					
 					try {
 						Position newPos = (Position) msg.getContentObject();
@@ -195,12 +193,6 @@ public class piece extends Agent {
 					try {
 						//System.out.println(msg.getSender().getLocalName());
 						ArrayList<Position> surr = (ArrayList<Position>) msg.getContentObject();
-						//System.out.print(surr.get(0).getX());
-						//System.out.println(myAgent.getLocalName() + " Received Information about Surroundings");
-						//team_manager = content;
-						
-						//MOVE
-						System.out.println("Received Inform");	
 						ACLMessage reply = new ACLMessage(ACLMessage.INFORM);
 						//add pieces position to the list so manager has access to that information
 						surr.add(current_location);
