@@ -247,7 +247,7 @@ public class manager extends Agent {
 			if(GameState == "Start")
 			{
 				
-				for (int i = 0; i < 1;)
+				for (int i = 0; i < 10;)
 				{
 					if (pieces.get(i).isAvailable()) {
 						//System.out.println("Asking to move");
