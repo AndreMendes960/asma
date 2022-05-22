@@ -247,7 +247,7 @@ public class manager extends Agent {
 			if(GameState == "Start")
 			{
 				
-				for (int i = 0; i < 10;)
+				for (int i = 0; i < 1;)
 				{
 					if (pieces.get(i).isAvailable()) {
 						//System.out.println("Asking to move");
@@ -348,6 +348,40 @@ public class manager extends Agent {
 				//Round Final. Check all positions
 				
 				int eliminatedA =0 , eliminatedB = 0;
+				
+				for (int row = 0; row < 35; row++)
+			      {
+			          System.out.println("");
+			          //System.out.println("------------------------------------------------------------------------------------------------------------------------------------");
+
+			          for (int column = 0; column < 35; column++)
+			          {
+			              System.out.print("| ");
+			              
+			              boolean printed = false;
+			              for (int index = 0; index < pieces.size(); index++)
+			              {
+			            	  if(pieces.get(index).getPosition().getX() == column && pieces.get(index).getPosition().getY() == row)
+			            	  {
+			            		  printed = true;
+			            		  if(index < 5)
+			            		  {
+			            			  System.out.print(ANSIConstants.ANSI_BLUE + "X "  + ANSIConstants.ANSI_RESET);
+			            		  }
+			            		  else
+			            		  {
+			            			  System.out.print(ANSIConstants.ANSI_RED + "X "  + ANSIConstants.ANSI_RESET); 
+			            		  }
+			            	  }  
+			              }
+			              if(!printed)
+		            	  {
+		            		  System.out.print("  ");
+		            	  }
+			          }           
+			    }
+			    System.out.println("");
+			    //System.out.println("------------------------------------------------------------------------------------------------------------------------------------");
 				
 				for(int i = 0; i < pieces.size(); i++)
 				{
